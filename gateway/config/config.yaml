@@ -1,0 +1,15 @@
+server:
+  port: 8080
+  timeout: 30s
+
+services:
+  auth:
+    address: "auth-service:50051"
+    timeout: 5s
+  event:
+    address: "event-service:50052" 
+    timeout: 5s
+
+
+logging:
+  level: "info"

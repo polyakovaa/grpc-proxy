@@ -1,0 +1,14 @@
+server:
+  port: 50052
+  timeout: 30s
+
+database:
+  host: "event_db" 
+  port: 5432
+  name: "event_db"
+  user: "event_user"
+  password: "password"
+  ssl_mode: "disable"
+
+logging:
+  level: "info"

@@ -1,0 +1,87 @@
+services:
+  auth-service:
+    build:
+      context: .
+      dockerfile: auth_service/Dockerfile
+    container_name: auth-service
+    ports:
+      - "50051:50051"
+    depends_on:
+      - auth_db
+    environment:
+      - DATABASE_HOST=auth_db
+      - DATABASE_PORT=5432
+      - DATABASE_USER=auth_user
+      - DATABASE_PASSWORD=password
+      - DATABASE_NAME=auth_db
+    networks:
+      - backend
+
+  event-service:
+    build:
+      context: .
+      dockerfile: event_service/Dockerfile
+    container_name: event-service
+    ports:
+      - "50052:50052"
+    depends_on:
+      - event_db
+    environment:
+      - DATABASE_HOST=event_db
+      - DATABASE_PORT=5432
+      - DATABASE_USER=event_user
+      - DATABASE_PASSWORD=password
+      - DATABASE_NAME=event_db
+    networks:
+      - backend
+
+  gateway:
+    build:
+      context: .
+      dockerfile: gateway/Dockerfile
+    container_name: gateway
+    ports:
+      - "8080:8080"
+    depends_on:
+      - auth-service
+      - event-service
+    networks:
+      - backend
+
+  auth_db:
+    image: postgres:16
+    container_name: auth_db
+    restart: always
+    environment:
+      POSTGRES_DB: auth_db
+      POSTGRES_USER: auth_user
+      POSTGRES_PASSWORD: password
+    ports:
+      - "5433:5432"
+    volumes:
+      - auth_db_data:/var/lib/postgresql/data
+    networks:
+      - backend
+
+  event_db:
+    image: postgres:16
+    container_name: event_db
+    restart: always
+    environment:
+      POSTGRES_DB: event_db
+      POSTGRES_USER: event_user
+      POSTGRES_PASSWORD: password
+    ports:
+      - "5434:5432"
+    volumes:
+      - event_db_data:/var/lib/postgresql/data
+    networks:
+      - backend
+
+networks:
+  backend:
+    driver: bridge
+
+volumes:
+  auth_db_data:
+  event_db_data:

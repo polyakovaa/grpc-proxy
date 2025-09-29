@@ -1,0 +1,18 @@
+server:
+  port: 50051
+  timeout: 30s
+
+database:
+  host: "localhost"
+  port: 5432
+  name: "auth_db"
+  user: "auth_user"
+  password: "password"
+  ssl_mode: "disable"
+
+jwt:
+  secret: "secret-key"
+  expiration: "24h"
+
+logging:
+  level: "info"
