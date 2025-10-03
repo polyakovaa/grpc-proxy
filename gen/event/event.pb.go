@@ -26,6 +26,7 @@ type CreateEventRequest struct {
 	Title         string                 `protobuf:"bytes,1,opt,name=title,proto3" json:"title,omitempty"`
 	Description   string                 `protobuf:"bytes,2,opt,name=description,proto3" json:"description,omitempty"`
 	Date          string                 `protobuf:"bytes,3,opt,name=date,proto3" json:"date,omitempty"`
+	OrganizerId   string                 `protobuf:"bytes,4,opt,name=organizer_id,json=organizerId,proto3" json:"organizer_id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -77,6 +78,13 @@ func (x *CreateEventRequest) GetDescription() string {
 func (x *CreateEventRequest) GetDate() string {
 	if x != nil {
 		return x.Date
+	}
+	return ""
+}
+
+func (x *CreateEventRequest) GetOrganizerId() string {
+	if x != nil {
+		return x.OrganizerId
 	}
 	return ""
 }
@@ -183,6 +191,7 @@ type EventResponse struct {
 	Title         string                 `protobuf:"bytes,2,opt,name=title,proto3" json:"title,omitempty"`
 	Description   string                 `protobuf:"bytes,3,opt,name=description,proto3" json:"description,omitempty"`
 	Date          string                 `protobuf:"bytes,4,opt,name=date,proto3" json:"date,omitempty"`
+	OrganizerId   string                 `protobuf:"bytes,5,opt,name=organizer_id,json=organizerId,proto3" json:"organizer_id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -241,6 +250,13 @@ func (x *EventResponse) GetDescription() string {
 func (x *EventResponse) GetDate() string {
 	if x != nil {
 		return x.Date
+	}
+	return ""
+}
+
+func (x *EventResponse) GetOrganizerId() string {
+	if x != nil {
+		return x.OrganizerId
 	}
 	return ""
 }
@@ -305,33 +321,157 @@ func (x *JoinEventResponse) GetJoinId() string {
 	return ""
 }
 
+type ListEventsRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Page          int32                  `protobuf:"varint,1,opt,name=page,proto3" json:"page,omitempty"`
+	Limit         int32                  `protobuf:"varint,2,opt,name=limit,proto3" json:"limit,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListEventsRequest) Reset() {
+	*x = ListEventsRequest{}
+	mi := &file_proto_event_proto_msgTypes[5]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListEventsRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListEventsRequest) ProtoMessage() {}
+
+func (x *ListEventsRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_proto_event_proto_msgTypes[5]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListEventsRequest.ProtoReflect.Descriptor instead.
+func (*ListEventsRequest) Descriptor() ([]byte, []int) {
+	return file_proto_event_proto_rawDescGZIP(), []int{5}
+}
+
+func (x *ListEventsRequest) GetPage() int32 {
+	if x != nil {
+		return x.Page
+	}
+	return 0
+}
+
+func (x *ListEventsRequest) GetLimit() int32 {
+	if x != nil {
+		return x.Limit
+	}
+	return 0
+}
+
+type ListEventsResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Events        []*EventResponse       `protobuf:"bytes,1,rep,name=events,proto3" json:"events,omitempty"`
+	TotalCount    int32                  `protobuf:"varint,2,opt,name=total_count,json=totalCount,proto3" json:"total_count,omitempty"`
+	Page          int32                  `protobuf:"varint,3,opt,name=page,proto3" json:"page,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListEventsResponse) Reset() {
+	*x = ListEventsResponse{}
+	mi := &file_proto_event_proto_msgTypes[6]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListEventsResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListEventsResponse) ProtoMessage() {}
+
+func (x *ListEventsResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_proto_event_proto_msgTypes[6]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListEventsResponse.ProtoReflect.Descriptor instead.
+func (*ListEventsResponse) Descriptor() ([]byte, []int) {
+	return file_proto_event_proto_rawDescGZIP(), []int{6}
+}
+
+func (x *ListEventsResponse) GetEvents() []*EventResponse {
+	if x != nil {
+		return x.Events
+	}
+	return nil
+}
+
+func (x *ListEventsResponse) GetTotalCount() int32 {
+	if x != nil {
+		return x.TotalCount
+	}
+	return 0
+}
+
+func (x *ListEventsResponse) GetPage() int32 {
+	if x != nil {
+		return x.Page
+	}
+	return 0
+}
+
 var File_proto_event_proto protoreflect.FileDescriptor
 
 const file_proto_event_proto_rawDesc = "" +
 	"\n" +
-	"\x11proto/event.proto\x12\x05event\"`\n" +
+	"\x11proto/event.proto\x12\x05event\"\x83\x01\n" +
 	"\x12CreateEventRequest\x12\x14\n" +
 	"\x05title\x18\x01 \x01(\tR\x05title\x12 \n" +
 	"\vdescription\x18\x02 \x01(\tR\vdescription\x12\x12\n" +
-	"\x04date\x18\x03 \x01(\tR\x04date\",\n" +
+	"\x04date\x18\x03 \x01(\tR\x04date\x12!\n" +
+	"\forganizer_id\x18\x04 \x01(\tR\vorganizerId\",\n" +
 	"\x0fGetEventRequest\x12\x19\n" +
 	"\bevent_id\x18\x01 \x01(\tR\aeventId\"F\n" +
 	"\x10JoinEventRequest\x12\x19\n" +
 	"\bevent_id\x18\x01 \x01(\tR\aeventId\x12\x17\n" +
-	"\auser_id\x18\x02 \x01(\tR\x06userId\"v\n" +
+	"\auser_id\x18\x02 \x01(\tR\x06userId\"\x99\x01\n" +
 	"\rEventResponse\x12\x19\n" +
 	"\bevent_id\x18\x01 \x01(\tR\aeventId\x12\x14\n" +
 	"\x05title\x18\x02 \x01(\tR\x05title\x12 \n" +
 	"\vdescription\x18\x03 \x01(\tR\vdescription\x12\x12\n" +
-	"\x04date\x18\x04 \x01(\tR\x04date\"`\n" +
+	"\x04date\x18\x04 \x01(\tR\x04date\x12!\n" +
+	"\forganizer_id\x18\x05 \x01(\tR\vorganizerId\"`\n" +
 	"\x11JoinEventResponse\x12\x18\n" +
 	"\asuccess\x18\x01 \x01(\bR\asuccess\x12\x18\n" +
 	"\amessage\x18\x02 \x01(\tR\amessage\x12\x17\n" +
-	"\ajoin_id\x18\x03 \x01(\tR\x06joinId2\xc8\x01\n" +
+	"\ajoin_id\x18\x03 \x01(\tR\x06joinId\"=\n" +
+	"\x11ListEventsRequest\x12\x12\n" +
+	"\x04page\x18\x01 \x01(\x05R\x04page\x12\x14\n" +
+	"\x05limit\x18\x02 \x01(\x05R\x05limit\"w\n" +
+	"\x12ListEventsResponse\x12,\n" +
+	"\x06events\x18\x01 \x03(\v2\x14.event.EventResponseR\x06events\x12\x1f\n" +
+	"\vtotal_count\x18\x02 \x01(\x05R\n" +
+	"totalCount\x12\x12\n" +
+	"\x04page\x18\x03 \x01(\x05R\x04page2\x8b\x02\n" +
 	"\fEventService\x12>\n" +
 	"\vCreateEvent\x12\x19.event.CreateEventRequest\x1a\x14.event.EventResponse\x128\n" +
 	"\bGetEvent\x12\x16.event.GetEventRequest\x1a\x14.event.EventResponse\x12>\n" +
-	"\tJoinEvent\x12\x17.event.JoinEventRequest\x1a\x18.event.JoinEventResponseB\vZ\tgen/eventb\x06proto3"
+	"\tJoinEvent\x12\x17.event.JoinEventRequest\x1a\x18.event.JoinEventResponse\x12A\n" +
+	"\n" +
+	"ListEvents\x12\x18.event.ListEventsRequest\x1a\x19.event.ListEventsResponseB\vZ\tgen/eventb\x06proto3"
 
 var (
 	file_proto_event_proto_rawDescOnce sync.Once
@@ -345,26 +485,31 @@ func file_proto_event_proto_rawDescGZIP() []byte {
 	return file_proto_event_proto_rawDescData
 }
 
-var file_proto_event_proto_msgTypes = make([]protoimpl.MessageInfo, 5)
+var file_proto_event_proto_msgTypes = make([]protoimpl.MessageInfo, 7)
 var file_proto_event_proto_goTypes = []any{
 	(*CreateEventRequest)(nil), // 0: event.CreateEventRequest
 	(*GetEventRequest)(nil),    // 1: event.GetEventRequest
 	(*JoinEventRequest)(nil),   // 2: event.JoinEventRequest
 	(*EventResponse)(nil),      // 3: event.EventResponse
 	(*JoinEventResponse)(nil),  // 4: event.JoinEventResponse
+	(*ListEventsRequest)(nil),  // 5: event.ListEventsRequest
+	(*ListEventsResponse)(nil), // 6: event.ListEventsResponse
 }
 var file_proto_event_proto_depIdxs = []int32{
-	0, // 0: event.EventService.CreateEvent:input_type -> event.CreateEventRequest
-	1, // 1: event.EventService.GetEvent:input_type -> event.GetEventRequest
-	2, // 2: event.EventService.JoinEvent:input_type -> event.JoinEventRequest
-	3, // 3: event.EventService.CreateEvent:output_type -> event.EventResponse
-	3, // 4: event.EventService.GetEvent:output_type -> event.EventResponse
-	4, // 5: event.EventService.JoinEvent:output_type -> event.JoinEventResponse
-	3, // [3:6] is the sub-list for method output_type
-	0, // [0:3] is the sub-list for method input_type
-	0, // [0:0] is the sub-list for extension type_name
-	0, // [0:0] is the sub-list for extension extendee
-	0, // [0:0] is the sub-list for field type_name
+	3, // 0: event.ListEventsResponse.events:type_name -> event.EventResponse
+	0, // 1: event.EventService.CreateEvent:input_type -> event.CreateEventRequest
+	1, // 2: event.EventService.GetEvent:input_type -> event.GetEventRequest
+	2, // 3: event.EventService.JoinEvent:input_type -> event.JoinEventRequest
+	5, // 4: event.EventService.ListEvents:input_type -> event.ListEventsRequest
+	3, // 5: event.EventService.CreateEvent:output_type -> event.EventResponse
+	3, // 6: event.EventService.GetEvent:output_type -> event.EventResponse
+	4, // 7: event.EventService.JoinEvent:output_type -> event.JoinEventResponse
+	6, // 8: event.EventService.ListEvents:output_type -> event.ListEventsResponse
+	5, // [5:9] is the sub-list for method output_type
+	1, // [1:5] is the sub-list for method input_type
+	1, // [1:1] is the sub-list for extension type_name
+	1, // [1:1] is the sub-list for extension extendee
+	0, // [0:1] is the sub-list for field type_name
 }
 
 func init() { file_proto_event_proto_init() }
@@ -378,7 +523,7 @@ func file_proto_event_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_proto_event_proto_rawDesc), len(file_proto_event_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   5,
+			NumMessages:   7,
 			NumExtensions: 0,
 			NumServices:   1,
 		},
