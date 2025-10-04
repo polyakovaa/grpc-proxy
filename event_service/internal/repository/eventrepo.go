@@ -79,7 +79,7 @@ func (r *EventRepository) GetEventByID(eventID string) (*model.Event, error) {
 	return &event, nil
 }
 
-func (r *EventRepository) GetEvents(limit, offset int) ([]*model.Event, error) {
+func (r *EventRepository) GetEvents(limit, offset int32) ([]*model.Event, int32, error) {
 	query := `
 		SELECT id, title, description, date, organizer_id
 		FROM events  
@@ -88,7 +88,7 @@ func (r *EventRepository) GetEvents(limit, offset int) ([]*model.Event, error) {
 
 	rows, err := r.db.Query(query, limit, offset)
 	if err != nil {
-		return nil, fmt.Errorf("failed to get events: %w", err)
+		return nil, 0, err
 	}
 	defer rows.Close()
 
@@ -103,10 +103,16 @@ func (r *EventRepository) GetEvents(limit, offset int) ([]*model.Event, error) {
 			&event.OrganizerID,
 		)
 		if err != nil {
-			return nil, fmt.Errorf("failed to scan event: %w", err)
+			return nil, 0, fmt.Errorf("failed to scan event: %w", err)
 		}
 		events = append(events, &event)
 	}
 
-	return events, nil
+	var totalCount int32
+	err = r.db.QueryRow(`SELECT COUNT(*) FROM events`).Scan(&totalCount)
+	if err != nil {
+		return nil, 0, err
+	}
+
+	return events, totalCount, nil
 }

@@ -323,8 +323,8 @@ func (x *JoinEventResponse) GetJoinId() string {
 
 type ListEventsRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Page          int32                  `protobuf:"varint,1,opt,name=page,proto3" json:"page,omitempty"`
-	Limit         int32                  `protobuf:"varint,2,opt,name=limit,proto3" json:"limit,omitempty"`
+	Limit         int32                  `protobuf:"varint,1,opt,name=limit,proto3" json:"limit,omitempty"`
+	Offset        int32                  `protobuf:"varint,2,opt,name=offset,proto3" json:"offset,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -359,16 +359,16 @@ func (*ListEventsRequest) Descriptor() ([]byte, []int) {
 	return file_proto_event_proto_rawDescGZIP(), []int{5}
 }
 
-func (x *ListEventsRequest) GetPage() int32 {
+func (x *ListEventsRequest) GetLimit() int32 {
 	if x != nil {
-		return x.Page
+		return x.Limit
 	}
 	return 0
 }
 
-func (x *ListEventsRequest) GetLimit() int32 {
+func (x *ListEventsRequest) GetOffset() int32 {
 	if x != nil {
-		return x.Limit
+		return x.Offset
 	}
 	return 0
 }
@@ -377,7 +377,6 @@ type ListEventsResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Events        []*EventResponse       `protobuf:"bytes,1,rep,name=events,proto3" json:"events,omitempty"`
 	TotalCount    int32                  `protobuf:"varint,2,opt,name=total_count,json=totalCount,proto3" json:"total_count,omitempty"`
-	Page          int32                  `protobuf:"varint,3,opt,name=page,proto3" json:"page,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -426,13 +425,6 @@ func (x *ListEventsResponse) GetTotalCount() int32 {
 	return 0
 }
 
-func (x *ListEventsResponse) GetPage() int32 {
-	if x != nil {
-		return x.Page
-	}
-	return 0
-}
-
 var File_proto_event_proto protoreflect.FileDescriptor
 
 const file_proto_event_proto_rawDesc = "" +
@@ -457,15 +449,14 @@ const file_proto_event_proto_rawDesc = "" +
 	"\x11JoinEventResponse\x12\x18\n" +
 	"\asuccess\x18\x01 \x01(\bR\asuccess\x12\x18\n" +
 	"\amessage\x18\x02 \x01(\tR\amessage\x12\x17\n" +
-	"\ajoin_id\x18\x03 \x01(\tR\x06joinId\"=\n" +
-	"\x11ListEventsRequest\x12\x12\n" +
-	"\x04page\x18\x01 \x01(\x05R\x04page\x12\x14\n" +
-	"\x05limit\x18\x02 \x01(\x05R\x05limit\"w\n" +
+	"\ajoin_id\x18\x03 \x01(\tR\x06joinId\"A\n" +
+	"\x11ListEventsRequest\x12\x14\n" +
+	"\x05limit\x18\x01 \x01(\x05R\x05limit\x12\x16\n" +
+	"\x06offset\x18\x02 \x01(\x05R\x06offset\"c\n" +
 	"\x12ListEventsResponse\x12,\n" +
 	"\x06events\x18\x01 \x03(\v2\x14.event.EventResponseR\x06events\x12\x1f\n" +
 	"\vtotal_count\x18\x02 \x01(\x05R\n" +
-	"totalCount\x12\x12\n" +
-	"\x04page\x18\x03 \x01(\x05R\x04page2\x8b\x02\n" +
+	"totalCount2\x8b\x02\n" +
 	"\fEventService\x12>\n" +
 	"\vCreateEvent\x12\x19.event.CreateEventRequest\x1a\x14.event.EventResponse\x128\n" +
 	"\bGetEvent\x12\x16.event.GetEventRequest\x1a\x14.event.EventResponse\x12>\n" +

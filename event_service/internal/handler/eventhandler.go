@@ -63,4 +63,25 @@ func (h *EventHandler) JoinEvent(ctx context.Context, req *event.JoinEventReques
 	}, nil
 }
 
-//TODO сюда лист ивент хэндлер
+func (h *EventHandler) ListEvents(ctx context.Context, req *event.ListEventsRequest) (*event.ListEventsResponse, error) {
+	eventsList, totalCount, err := h.eventService.GetEvents(req.Limit, req.Offset)
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "failed to list events: %v", err)
+	}
+	var events []*event.EventResponse
+
+	for _, evt := range eventsList {
+		e := &event.EventResponse{
+			EventId:     evt.ID,
+			Title:       evt.Title,
+			Description: evt.Description,
+			Date:        evt.Date,
+			OrganizerId: evt.OrganizerID,
+		}
+		events = append(events, e)
+	}
+	return &event.ListEventsResponse{
+		Events:     events,
+		TotalCount: totalCount,
+	}, nil
+}

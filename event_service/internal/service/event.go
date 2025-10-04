@@ -40,7 +40,13 @@ func (s *EventService) CreateEvent(title, description, date, organizerID string)
 }
 
 func (s *EventService) GetEvent(eventID string) (*model.Event, error) {
-	return s.eventRepo.GetEventByID(eventID)
+
+	event, err := s.eventRepo.GetEventByID(eventID)
+	if err != nil {
+		return nil, err
+	}
+
+	return event, nil
 }
 
 func (s *EventService) JoinEvent(eventID, userID string) (string, error) {
@@ -56,6 +62,15 @@ func (s *EventService) JoinEvent(eventID, userID string) (string, error) {
 	}
 
 	return joinID, nil
+}
+
+func (s *EventService) GetEvents(limit, offset int32) ([]*model.Event, int32, error) {
+	events, count, err := s.eventRepo.GetEvents(limit, offset)
+	if err != nil {
+		return nil, 0, err
+	}
+
+	return events, count, nil
 }
 
 func generateID() string {

@@ -75,6 +75,7 @@ services:
       - "5434:5432"
     volumes:
       - event_db_data:/var/lib/postgresql/data
+      - ./event_service/internal/repository:/docker-entrypoint-initdb.d
     networks:
       - backend
 

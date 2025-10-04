@@ -13,7 +13,3 @@ type ServerConfig struct {
 
 type DatabaseConfig struct {
 }
-
-func NewConfig() *Config {
-	return &Config{}
-}

@@ -4,10 +4,10 @@ server:
 
 services:
   auth:
-    address: "auth-service:50051"
+    address: "dns:///auth-service:50051"
     timeout: 5s
   event:
-    address: "event-service:50052" 
+    address: "dns:///event-service:50052" 
     timeout: 5s
 
 

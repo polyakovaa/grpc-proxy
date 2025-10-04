@@ -3,6 +3,7 @@ package handler
 import (
 	"fmt"
 	"log"
+	"strconv"
 	"strings"
 
 	"github.com/gin-gonic/gin"
@@ -38,10 +39,17 @@ func (h *EventHandler) CreateEvent(c *gin.Context) {
 		return
 	}
 
+	userID, err := h.getAuthenticatedUserID(c)
+	if err != nil {
+		c.JSON(401, gin.H{"error": "Unauthorized"})
+		return
+	}
+
 	response, err := h.eventClient.CreateEvent(c.Request.Context(), &event.CreateEventRequest{
 		Title:       request.Title,
 		Description: request.Description,
 		Date:        request.Date,
+		OrganizerId: userID,
 	})
 	if err != nil {
 		log.Printf("CreateEvent error: %v", err)
@@ -80,6 +88,55 @@ func (h *EventHandler) GetEvent(c *gin.Context) {
 		"title":       response.Title,
 		"description": response.Description,
 		"date":        response.Date,
+	})
+
+}
+
+func (h *EventHandler) GetEvents(c *gin.Context) {
+	if h.eventClient == nil {
+		c.JSON(503, gin.H{"error": "Event service unavailable"})
+		return
+	}
+
+	offsetStr := c.DefaultQuery("offset", "5")
+	limitStr := c.DefaultQuery("limit", "10")
+
+	offset, err := strconv.Atoi(offsetStr)
+	if err != nil || offset < 1 {
+		c.JSON(400, gin.H{"error": "invalid offset"})
+		return
+	}
+
+	limit, err := strconv.Atoi(limitStr)
+	if err != nil || limit < 1 {
+		c.JSON(400, gin.H{"error": "invalid limit"})
+		return
+	}
+
+	resp, err := h.eventClient.ListEvents(c.Request.Context(), &event.ListEventsRequest{
+		Offset: int32(offset),
+		Limit:  int32(limit),
+	})
+	if err != nil {
+		log.Printf("ListEvents error: %v", err)
+		c.JSON(500, gin.H{"error": "internal error"})
+		return
+	}
+
+	events := []gin.H{}
+	for _, e := range resp.Events {
+		events = append(events, gin.H{
+			"id":          e.EventId,
+			"title":       e.Title,
+			"description": e.Description,
+			"date":        e.Date,
+			"organizerId": e.OrganizerId,
+		})
+	}
+
+	c.JSON(200, gin.H{
+		"events":      events,
+		"total_count": resp.TotalCount,
 	})
 
 }

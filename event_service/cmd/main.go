@@ -37,6 +37,7 @@ func main() {
 	}
 
 	grpcServer := grpc.NewServer()
+
 	event.RegisterEventServiceServer(grpcServer, eventHandler)
 
 	log.Printf("Event service running on :%s", cfg.Server.Port)
