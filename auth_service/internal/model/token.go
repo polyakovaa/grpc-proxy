@@ -8,8 +8,9 @@ type Token struct {
 }
 
 type RefreshToken struct {
-	TokenHash     string    `json:"-" db:"token_hash"`
-	AccessTokenID string    `json:"-" db:"access_token_id"`
-	UserID        string    `json:"-" db:"user_id"`
-	Expires       time.Time `json:"-" db:"expires"`
+	ID            string    `json:"id" db:"id"`
+	UserID        string    `json:"user_id" db:"user_id"`
+	TokenHash     string    `json:"token_hash" db:"token_hash"`
+	AccessTokenID string    `json:"access_token_id" db:"access_token_id"`
+	ExpiresAt     time.Time `json:"expires_at" db:"expires_at"`
 }

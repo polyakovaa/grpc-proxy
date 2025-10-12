@@ -12,7 +12,8 @@ database:
 
 jwt:
   secret: "secret-key"
-  expiration: "24h"
+  access_ttl: "15m" 
+  refresh_ttl: "7d"
 
 logging:
   level: "info"

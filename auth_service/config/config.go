@@ -1,9 +1,18 @@
 package config
 
-import "time"
+import (
+	"fmt"
+	"os"
+	"time"
 
-type LoggingConfig struct {
-	Level string `yaml:"level"`
+	"gopkg.in/yaml.v2"
+)
+
+type AuthServiceConfig struct {
+	Server   ServerConfig  `yaml:"server"`
+	Database DBConfig      `yaml:"database"`
+	Logging  LoggingConfig `yaml:"logging"`
+	JWT      JWTConfig     `yaml:"jwt"`
 }
 
 type ServerConfig struct {
@@ -11,5 +20,43 @@ type ServerConfig struct {
 	Timeout time.Duration `yaml:"timeout"`
 }
 
-type DatabaseConfig struct {
+type LoggingConfig struct {
+	Level string `yaml:"level"`
+}
+
+type DBConfig struct {
+	Host     string `yaml:"host"`
+	Port     int    `yaml:"port"`
+	DBName   string `yaml:"name"`
+	User     string `yaml:"user"`
+	Password string `yaml:"password"`
+	SSLMode  string `yaml:"ssl_mode"`
+
+	MaxOpenConns    int           `yaml:"max_open_conns"`
+	MaxIdleConns    int           `yaml:"max_idle_conns"`
+	ConnMaxLifetime time.Duration `yaml:"conn_max_lifetime"`
+}
+
+type JWTConfig struct {
+	Secret     string        `yaml:"secret"`
+	AccessTTL  time.Duration `yaml:"access_ttl"`
+	RefreshTTL time.Duration `yaml:"refresh_ttl"`
+}
+
+func LoadConfig(path string) (*AuthServiceConfig, error) {
+	file, err := os.Open(path)
+	if err != nil {
+		return nil, fmt.Errorf("failed to open config file for EventService: %w", err)
+	}
+	defer file.Close()
+
+	var cfg AuthServiceConfig
+	decoder := yaml.NewDecoder(file)
+	if err := decoder.Decode(&cfg); err != nil {
+		return nil, fmt.Errorf("failed to decode YAML: %w", err)
+	}
+
+	
+
+	return &cfg, nil
 }

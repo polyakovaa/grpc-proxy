@@ -51,7 +51,6 @@ services:
   auth_db:
     image: postgres:16
     container_name: auth_db
-    restart: always
     environment:
       POSTGRES_DB: auth_db
       POSTGRES_USER: auth_user
@@ -60,13 +59,13 @@ services:
       - "5433:5432"
     volumes:
       - auth_db_data:/var/lib/postgresql/data
+      - ./auth_service/internal/repository:/docker-entrypoint-initdb.d
     networks:
       - backend
 
   event_db:
     image: postgres:16
     container_name: event_db
-    restart: always
     environment:
       POSTGRES_DB: event_db
       POSTGRES_USER: event_user

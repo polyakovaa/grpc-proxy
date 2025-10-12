@@ -1,8 +1,11 @@
 package model
 
+import "time"
+
 type User struct {
-	ID           int    `json:"id" db:"id"`
-	Login        string `json:"login" db:"login"`
-	Email        string `json:"email" db:"email"`
-	PasswordHash string `json:"-" db:"password_hash"`
+	ID           string    `db:"id"`
+	UserName     string    `db:"user_name"`
+	Email        string    `db:"email"`
+	PasswordHash string    `db:"password_hash"`
+	CreatedAt    time.Time `db:"created_at"`
 }
