@@ -24,7 +24,7 @@ func (s *EventService) CreateEvent(title, description, date, organizerID string)
 	}
 
 	event := &model.Event{
-		ID:          generateID(),
+		ID:          uuid.NewString(),
 		Title:       title,
 		Description: description,
 		Date:        date,
@@ -55,7 +55,7 @@ func (s *EventService) JoinEvent(eventID, userID string) (string, error) {
 		return "", fmt.Errorf("event not found")
 	}
 
-	joinID := generateID()
+	joinID := uuid.NewString()
 	err = s.eventRepo.AddParticipant(eventID, userID, joinID)
 	if err != nil {
 		return "", err
@@ -71,8 +71,4 @@ func (s *EventService) GetEvents(limit, offset int32) ([]*model.Event, int32, er
 	}
 
 	return events, count, nil
-}
-
-func generateID() string {
-	return uuid.NewString()
 }

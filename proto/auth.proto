@@ -29,6 +29,7 @@ message ValidateTokenRequest {
 
 message RefreshTokenRequest {
     string refresh_token = 1;
+    string access_token = 2;
 }
 
 message AuthResponse{

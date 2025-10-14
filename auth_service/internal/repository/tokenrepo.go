@@ -3,6 +3,7 @@ package repository
 import (
 	"database/sql"
 	"errors"
+	"log"
 
 	"github.com/polyakovaa/grpcproxy/auth_service/internal/model"
 )
@@ -46,4 +47,14 @@ func (r *TokenRepository) FindRefreshToken(accessTokenID string) (*model.Refresh
 		return nil, errors.New("token not found or expired")
 	}
 	return t, err
+}
+
+func (r *TokenRepository) DeleteByAccessTokenID(accessTokenID string) error {
+	query := `DELETE FROM refresh_tokens WHERE access_token_id = $1`
+	_, err := r.db.Exec(query, accessTokenID)
+	if err != nil {
+		log.Printf("Error deleting refresh token by access token ID %s: %v", accessTokenID, err)
+		return err
+	}
+	return nil
 }
