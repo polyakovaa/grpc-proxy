@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/gin-gonic/gin"
+	"github.com/polyakovaa/grpcproxy/gateway/internal/utils"
 	"github.com/polyakovaa/grpcproxy/gen/auth"
 	"github.com/polyakovaa/grpcproxy/gen/event"
 )
@@ -53,7 +54,7 @@ func (h *EventHandler) CreateEvent(c *gin.Context) {
 	})
 	if err != nil {
 		log.Printf("CreateEvent error: %v", err)
-		c.JSON(500, gin.H{"error": "internal error"})
+		utils.HandleGRPCError(c, err)
 		return
 	}
 
@@ -79,7 +80,7 @@ func (h *EventHandler) GetEvent(c *gin.Context) {
 
 	if err != nil {
 		log.Printf("GetEvent error: %v", err)
-		c.JSON(500, gin.H{"error": "internal error"})
+		utils.HandleGRPCError(c, err)
 		return
 	}
 
@@ -98,11 +99,11 @@ func (h *EventHandler) GetEvents(c *gin.Context) {
 		return
 	}
 
-	offsetStr := c.DefaultQuery("offset", "5")
+	offsetStr := c.DefaultQuery("offset", "0")
 	limitStr := c.DefaultQuery("limit", "10")
 
 	offset, err := strconv.Atoi(offsetStr)
-	if err != nil || offset < 1 {
+	if err != nil {
 		c.JSON(400, gin.H{"error": "invalid offset"})
 		return
 	}
@@ -119,7 +120,7 @@ func (h *EventHandler) GetEvents(c *gin.Context) {
 	})
 	if err != nil {
 		log.Printf("ListEvents error: %v", err)
-		c.JSON(500, gin.H{"error": "internal error"})
+		utils.HandleGRPCError(c, err)
 		return
 	}
 
@@ -162,7 +163,7 @@ func (h *EventHandler) JoinEvent(c *gin.Context) {
 	})
 
 	if err != nil {
-		c.JSON(500, gin.H{"error": "internal error"})
+		utils.HandleGRPCError(c, err)
 		return
 	}
 

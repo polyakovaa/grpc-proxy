@@ -2,6 +2,7 @@ package handler
 
 import (
 	"log"
+	"net/url"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -105,15 +106,22 @@ func (h *AuthHandler) RefreshToken(c *gin.Context) {
 		return
 	}
 
+	refreshToken, err = url.QueryUnescape(refreshToken)
+	if err != nil {
+		c.JSON(400, gin.H{"error": "invalid refresh token encoding"})
+		return
+	}
+
 	response, err := h.authClient.RefreshToken(c.Request.Context(), &auth.RefreshTokenRequest{
 		RefreshToken: refreshToken,
 	})
 
 	if err != nil {
 		utils.HandleGRPCError(c, err)
+		return
 	}
 
-	c.SetCookie("refresh_token", response.RefreshToken, int(response.ExpiresAt.AsTime().Unix()), "/", "", false, true)
+	c.SetCookie("refresh_token", response.RefreshToken, int(response.ExpiresAt.AsTime().Unix()-time.Now().Unix()), "/", "", false, true)
 
 	c.JSON(200, gin.H{
 		"access_token": response.AccessToken,

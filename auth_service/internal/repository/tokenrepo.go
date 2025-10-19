@@ -3,9 +3,9 @@ package repository
 import (
 	"database/sql"
 	"errors"
-	"log"
 
 	"github.com/polyakovaa/grpcproxy/auth_service/internal/model"
+	"golang.org/x/crypto/bcrypt"
 )
 
 type TokenRepository struct {
@@ -33,28 +33,29 @@ func (r *TokenRepository) CreateRefreshToken(token *model.RefreshToken) error {
 	return err
 }
 
-func (r *TokenRepository) FindRefreshToken(accessTokenID string) (*model.RefreshToken, error) {
-	t := &model.RefreshToken{}
-	query := `SELECT user_id, token_hash, expires_at FROM refresh_tokens WHERE access_token_id = $1 AND expires_at > NOW()`
+func (r *TokenRepository) FindByTokenHash(rawToken string) (*model.RefreshToken, error) {
+	rows := &model.RefreshToken{}
+	query := `SELECT id, user_id, token_hash, expires_at FROM refresh_tokens WHERE expires_at > NOW()`
 
-	err := r.db.QueryRow(query, accessTokenID).Scan(
-		&t.UserID,
-		&t.TokenHash,
-		&t.ExpiresAt,
+	err := r.db.QueryRow(query).Scan(
+		&rows.ID,
+		&rows.UserID,
+		&rows.TokenHash,
+		&rows.ExpiresAt,
 	)
-
 	if err == sql.ErrNoRows {
-		return nil, errors.New("token not found or expired")
+		return nil, errors.New("refresh token not found or expired")
 	}
-	return t, err
+
+	if bcrypt.CompareHashAndPassword([]byte(rows.TokenHash), []byte(rawToken)) != nil {
+		return nil, errors.New("invalid refresh token")
+	}
+
+	return rows, nil
 }
 
-func (r *TokenRepository) DeleteByAccessTokenID(accessTokenID string) error {
-	query := `DELETE FROM refresh_tokens WHERE access_token_id = $1`
-	_, err := r.db.Exec(query, accessTokenID)
-	if err != nil {
-		log.Printf("Error deleting refresh token by access token ID %s: %v", accessTokenID, err)
-		return err
-	}
-	return nil
+func (r *TokenRepository) DeleteByID(id string) error {
+	query := `DELETE FROM refresh_tokens WHERE id = $1`
+	_, err := r.db.Exec(query, id)
+	return err
 }

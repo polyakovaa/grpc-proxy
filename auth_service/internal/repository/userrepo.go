@@ -21,7 +21,6 @@ func (r *UserRepository) CreateUser(u *model.User) (*model.User, error) {
 
 	if err := r.db.QueryRow(
 		query,
-		u.ID,
 		u.UserName,
 		u.Email,
 		u.PasswordHash,

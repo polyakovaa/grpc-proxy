@@ -13,6 +13,8 @@ import (
 	"github.com/polyakovaa/grpcproxy/auth_service/internal/model"
 	"github.com/polyakovaa/grpcproxy/auth_service/internal/repository"
 	"golang.org/x/crypto/bcrypt"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 type AuthService struct {
@@ -89,49 +91,6 @@ func (s *AuthService) GenerateTokens(userID string) (*model.Token, error) {
 	}, nil
 }
 
-func (s *AuthService) RefreshToken(oldAccessToken, oldRefreshToken string) (*model.Token, error) {
-	claims, err := s.parseTokenClaims(oldAccessToken)
-	if err != nil {
-		return nil, fmt.Errorf("invalid access token: %w", err)
-	}
-
-	accessID, ok := claims["token_id"].(string)
-	if !ok {
-		return nil, errors.New("invalid claims: missing jti")
-	}
-
-	isValid, err := s.validateRefreshToken(oldRefreshToken, accessID)
-	if err != nil || !isValid {
-		log.Printf("Invalid refresh token for user %s", claims["user_id"].(string))
-		return nil, errors.New("invalid refresh token")
-	}
-
-	_ = s.tokenRepo.DeleteByAccessTokenID(accessID)
-
-	return s.GenerateTokens(claims["user_id"].(string))
-}
-
-func (s *AuthService) parseTokenClaims(tokenString string) (jwt.MapClaims, error) {
-	parser := jwt.NewParser(jwt.WithoutClaimsValidation())
-	token, _, err := parser.ParseUnverified(tokenString, jwt.MapClaims{})
-	if err != nil {
-		log.Printf("Error parsing token: %v", err)
-		return nil, err
-	}
-	return token.Claims.(jwt.MapClaims), nil
-}
-
-func (s *AuthService) validateRefreshToken(rawToken, accessTokenID string) (bool, error) {
-	storedToken, err := s.tokenRepo.FindRefreshToken(accessTokenID)
-	if err != nil {
-		log.Printf("Error finding refresh token in database: %v", err)
-		return false, err
-	}
-
-	err = bcrypt.CompareHashAndPassword([]byte(storedToken.TokenHash), []byte(rawToken))
-	return err == nil, nil
-}
-
 func (s *AuthService) ValidateAccessToken(tokenStr string) (*model.User, time.Time, bool) {
 	token, err := jwt.Parse(tokenStr, func(token *jwt.Token) (interface{}, error) {
 		return []byte(s.jwtSecret), nil
@@ -169,7 +128,7 @@ func (s *AuthService) ValidateAccessToken(tokenStr string) (*model.User, time.Ti
 func (s *AuthService) RegisterUser(username, email, password string) (*model.User, error) {
 	_, err := s.userRepo.FindByEmail(email)
 	if err == nil {
-		return nil, fmt.Errorf("user already exists")
+		return nil, status.Error(codes.AlreadyExists, "user already exists")
 	}
 
 	hashed, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
@@ -192,6 +151,21 @@ func (s *AuthService) RegisterUser(username, email, password string) (*model.Use
 
 }
 
+func (s *AuthService) RefreshToken(oldRefreshToken string) (*model.Token, error) {
+	storedToken, err := s.tokenRepo.FindByTokenHash(oldRefreshToken)
+	if err != nil {
+		return nil, fmt.Errorf("invalid refresh token: %w", err)
+	}
+
+	if time.Now().After(storedToken.ExpiresAt) {
+		return nil, errors.New("refresh token expired")
+	}
+
+	_ = s.tokenRepo.DeleteByID(storedToken.ID)
+
+	return s.GenerateTokens(storedToken.UserID)
+}
+
 func (s *AuthService) Authenticate(email, password string) (*model.User, error) {
 	user, err := s.userRepo.FindByEmail(email)
 	if err != nil {
@@ -199,7 +173,7 @@ func (s *AuthService) Authenticate(email, password string) (*model.User, error) 
 	}
 
 	if bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(password)) != nil {
-		return nil, errors.New("invalid email or password")
+		return nil, status.Error(codes.Unauthenticated, "invalid email or password")
 	}
 
 	return user, nil

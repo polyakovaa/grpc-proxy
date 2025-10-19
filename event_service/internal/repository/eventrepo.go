@@ -3,6 +3,7 @@ package repository
 import (
 	"database/sql"
 	"fmt"
+	"log"
 
 	"github.com/polyakovaa/grpcproxy/event_service/internal/model"
 )
@@ -19,12 +20,11 @@ func NewEventRepository(db *sql.DB) *EventRepository {
 
 func (r *EventRepository) CreateEvent(event *model.Event) error {
 	query := `
-		INSERT INTO events (id, title, description, date, organizer_id)
-		VALUES ($1, $2, $3, $4, $5)
+		INSERT INTO events (title, description, date, organizer_id)
+		VALUES ($1, $2, $3, $4)
 	`
 
 	_, err := r.db.Exec(query,
-		event.ID,
 		event.Title,
 		event.Description,
 		event.Date,
@@ -40,9 +40,8 @@ func (r *EventRepository) CreateEvent(event *model.Event) error {
 
 func (r *EventRepository) AddParticipant(eventID, userID, joinID string) error {
 	query := `
-		INSERT INTO event_participants (id, event_id, user_id)
+		INSERT INTO participants (id, event_id, user_id)
 		VALUES ($1, $2, $3)
-		ON CONFLICT (event_id, user_id) DO NOTHING
 	`
 
 	_, err := r.db.Exec(query, joinID, eventID, userID)
@@ -105,6 +104,7 @@ func (r *EventRepository) GetEvents(limit, offset int32) ([]*model.Event, int32,
 		if err != nil {
 			return nil, 0, fmt.Errorf("failed to scan event: %w", err)
 		}
+		log.Printf("Scanned event: %+v, err=%v", event, err)
 		events = append(events, &event)
 	}
 

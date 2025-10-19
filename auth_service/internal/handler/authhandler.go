@@ -78,7 +78,7 @@ func (h *AuthHandler) Login(ctx context.Context, req *auth.LoginRequest) (*auth.
 
 }
 func (h *AuthHandler) RefreshToken(ctx context.Context, req *auth.RefreshTokenRequest) (*auth.AuthResponse, error) {
-	newTokens, err := h.authService.RefreshToken(req.AccessToken, req.RefreshToken)
+	newTokens, err := h.authService.RefreshToken(req.RefreshToken)
 	if err != nil {
 		log.Printf("Failed to refresh token: %v", err)
 		return nil, err
