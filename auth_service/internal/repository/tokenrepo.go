@@ -34,24 +34,23 @@ func (r *TokenRepository) CreateRefreshToken(token *model.RefreshToken) error {
 }
 
 func (r *TokenRepository) FindByTokenHash(rawToken string) (*model.RefreshToken, error) {
-	rows := &model.RefreshToken{}
-	query := `SELECT id, user_id, token_hash, expires_at FROM refresh_tokens WHERE expires_at > NOW()`
-
-	err := r.db.QueryRow(query).Scan(
-		&rows.ID,
-		&rows.UserID,
-		&rows.TokenHash,
-		&rows.ExpiresAt,
-	)
-	if err == sql.ErrNoRows {
-		return nil, errors.New("refresh token not found or expired")
+	rows, err := r.db.Query(`SELECT id, user_id, token_hash, expires_at FROM refresh_tokens WHERE expires_at > NOW()`)
+	if err != nil {
+		return nil, err
 	}
+	defer rows.Close()
 
-	if bcrypt.CompareHashAndPassword([]byte(rows.TokenHash), []byte(rawToken)) != nil {
-		return nil, errors.New("invalid refresh token")
+	for rows.Next() {
+		t := &model.RefreshToken{}
+		if err := rows.Scan(&t.ID, &t.UserID, &t.TokenHash, &t.ExpiresAt); err != nil {
+			continue
+		}
+		if bcrypt.CompareHashAndPassword([]byte(t.TokenHash), []byte(rawToken)) == nil {
+			return t, nil
+		}
 	}
+	return nil, errors.New("invalid refresh token")
 
-	return rows, nil
 }
 
 func (r *TokenRepository) DeleteByID(id string) error {

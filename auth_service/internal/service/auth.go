@@ -152,6 +152,7 @@ func (s *AuthService) RegisterUser(username, email, password string) (*model.Use
 }
 
 func (s *AuthService) RefreshToken(oldRefreshToken string) (*model.Token, error) {
+
 	storedToken, err := s.tokenRepo.FindByTokenHash(oldRefreshToken)
 	if err != nil {
 		return nil, fmt.Errorf("invalid refresh token: %w", err)
