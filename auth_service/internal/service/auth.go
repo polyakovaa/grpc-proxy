@@ -11,18 +11,28 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
 	"github.com/polyakovaa/grpcproxy/auth_service/internal/model"
-	"github.com/polyakovaa/grpcproxy/auth_service/internal/repository"
 	"golang.org/x/crypto/bcrypt"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
 
 type AuthService struct {
-	userRepo   *repository.UserRepository
-	tokenRepo  *repository.TokenRepository
+	userRepo   UserRepo
+	tokenRepo  TokenRepo
 	jwtSecret  string
 	accessTTL  time.Duration
 	refreshTTL time.Duration
+}
+
+type UserRepo interface {
+	CreateUser(u *model.User) (*model.User, error)
+	FindByID(id string) (*model.User, error)
+	FindByEmail(email string) (*model.User, error)
+}
+type TokenRepo interface {
+	CreateRefreshToken(rt *model.RefreshToken) error
+	FindByTokenHash(token string) (*model.RefreshToken, error)
+	DeleteByID(id string) error
 }
 
 func (s *AuthService) AccessTTL() time.Duration {
@@ -30,8 +40,8 @@ func (s *AuthService) AccessTTL() time.Duration {
 }
 
 func NewAuthService(
-	userRepo *repository.UserRepository,
-	tokenRepo *repository.TokenRepository,
+	userRepo UserRepo,
+	tokenRepo TokenRepo,
 	secret string,
 	accessTTL, refreshTTL time.Duration,
 ) *AuthService {

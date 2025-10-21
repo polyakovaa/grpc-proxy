@@ -17,6 +17,7 @@ func HandleGRPCError(c *gin.Context, err error) {
 			c.JSON(401, gin.H{"error": status.Message()})
 		case codes.AlreadyExists:
 			c.JSON(409, gin.H{"error": status.Message()})
+		
 		default:
 			c.JSON(500, gin.H{"error": "internal server error"})
 		}
