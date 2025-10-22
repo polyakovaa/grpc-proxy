@@ -86,7 +86,7 @@ func TestGenerateTokens_JWTClaims(t *testing.T) {
 	tokens, err := svc.GenerateTokens(userID)
 	assert.NoError(t, err)
 	parsed, err := jwt.Parse(tokens.AccessToken, func(token *jwt.Token) (interface{}, error) {
-		return []byte("secret123"), nil
+		return []byte("secret"), nil
 	})
 
 	assert.NoError(t, err)
