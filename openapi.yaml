@@ -1,0 +1,369 @@
+openapi: 3.0.3
+
+info:
+  title: reading club API
+  description: API Gateway for Reading Club microservices
+  version: 1.0.0
+servers:
+  - url: http://localhost:8080
+    description: Development server
+
+tags:
+  - name: auth
+    description: Authentication and authorization service
+  - name: events
+    description: Reading club events management
+  - name: users
+    description: User profiles and management
+
+paths:
+  /auth/register:
+    post:
+      tags:
+        - auth
+      summary: Register new user
+      description: Create a new user account
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+      responses:
+        '503':
+          description: Auth service unavailable
+        '500':
+          description: Internal server error
+        '201':
+          description: User created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '400':
+          description: Invalid input
+        '409':
+          description: User already exists
+  /auth/login:
+    post:
+      tags:
+        - auth
+      summary: User login
+      description: Authenticate user and return tokens
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '503':
+          description: Auth service unavailable
+        '500':
+          description: Internal server error
+        '200':
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '401':
+          description: Invalid credentials
+  /auth/refresh:
+    post:
+      tags:
+        - auth
+      summary: Refresh access token
+      description: Create a new access token using refresh token from HTTP-only cookie
+      security: []
+      responses:
+        '503':
+          description: Auth service unavailable
+        '500':
+          description: Internal server error
+        '200':
+          description: Tokens refreshed successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  access_token:
+                    type: string
+                    example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+                  expires_at:
+                    type: string
+                    format: date-time
+                    example: "2024-01-15T12:00:00Z"
+          headers:
+            Set-Cookie:
+              description: New refresh token in HTTP-only cookie
+              schema:
+                type: string
+        '401':
+          description: |
+            - Refresh token required (missing cookie)
+            - Invalid refresh token encoding
+            - Invalid or expired refresh token
+  /events:
+    post:
+      tags:
+        - events
+      summary: Create new event
+      description: Create a new reading club event
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateEventRequest'
+      responses:
+        '503':
+          description: Event service unavailable
+        '500':
+          description: Internal server error
+        '201':
+          description: Event created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EventResponse'
+        '401':
+          description: Unauthorized
+  /events/{id}:
+    get:
+      tags:
+        - events
+      summary: Get event by ID
+      description: Retrieve event details
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Event ID
+      responses:
+        '503':
+          description: Event service unavailable
+        '500':
+          description: Internal server error
+        '200':
+          description: Event details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EventResponse'
+        '400':
+          description: Invalid argument
+        '404':
+          description: Event not found
+  /events/listevents:
+    get:
+      tags:
+        - events
+      summary: Get event list
+      description: Retrieve event list details
+      parameters:
+        - name: offset
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 0
+            default: 0
+          description: Number of events to skip
+          example: 0
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            default: 10
+          description: Maximum number of events to return
+          example: 10
+      responses:
+        '503':
+          description: Event service unavailable
+        '500':
+          description: Internal server error
+        '200':
+          description: Events retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  events:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/EventResponse'
+                  total_count:
+                    type: integer
+                    description: Total number of events available
+                    example: 42
+        '400':
+          description: |
+            Invalid query parameters:
+            - Invalid offset format
+            - Invalid limit format
+            - Limit less than 1
+  /events/{id}/join:
+    post:
+      tags:
+        - events
+      summary: Join event
+      description: Join a reading club event
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Event ID
+      responses:
+        '503':
+          description: Event service unavailable
+        '500':
+          description: Internal server error
+        '200':
+          description: Successfully joined event
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JoinEventResponse'
+        '400':
+          description: Invalid argument
+        '401':
+          description: Unauthorized
+        '404':
+          description: Event not found
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    RegisterRequest:
+      type: object
+      required:
+        - email
+        - password
+        - user_name
+      properties:
+        email:
+          type: string
+          format: email
+          example: user@example.com
+        password:
+          type: string
+          format: password
+          minLength: 6
+          example: "secret123"
+        user_name:
+          type: string
+          minLength: 2
+          example: "Vasya B"
+
+    LoginRequest:
+      type: object
+      required:
+          - email
+          - password
+      properties:
+        email:
+          type: string
+          format: email
+          example: user@example.com
+        password:
+          type: string
+          format: password
+          example: "secret123"
+
+    AuthResponse:
+      type: object
+      properties:
+        user_id:
+          type: string
+          example: "123e4567-e89b-12d3-a456-426614174000"
+        access_token:
+          type: string
+          example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+        refresh_token:
+          type: string
+          example: "def456..."
+        expires_at:
+          type: string
+          format: date-time
+          example: "2024-01-15T10:00:00Z"
+
+    JoinEventResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: "Successfully joined event"
+        join_id:
+          type: string
+          example: "c6eaf7ee-dc95-4e2f-a96...."  
+    EventResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          example: "c6eaf7ee-dc95-4e2f-a96...."
+        title:
+          type: string
+          example: "Book Club Meeting"
+        description:
+          type: string
+          example: "Discussion of 'The Great Gatsby'"
+        date:
+          type: string
+          format: date-time
+          example: "2024-01-20T18:00:00Z"
+        organizer_id:
+          type: string
+          example: "c6eaf7ee-dc95-4e2f-a96.... "
+    EventsListResponse:
+      type: object
+      properties:
+        events:
+          type: array
+          items:
+            $ref: '#/components/schemas/EventResponse'
+        total_count:
+          type: integer
+          example: 42
+    CreateEventRequest:
+      type: object
+      required:
+        - title
+        - date
+      properties:
+        title:
+          type: string
+          example: "Book Club Meeting"
+        description:
+          type: string
+          example: "Discussion of 'The Great Gatsby'"
+        date:
+          type: string
+          format: date-time
+          example: "2024-01-20T18:00:00Z"
+        
+      
+
+
+
+

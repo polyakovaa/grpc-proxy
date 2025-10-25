@@ -128,8 +128,3 @@ func (h *AuthHandler) RefreshToken(c *gin.Context) {
 		"expires_at":   response.ExpiresAt.AsTime().Format(time.RFC3339),
 	})
 }
-
-func (h *AuthHandler) Logout(c *gin.Context) {
-	c.SetCookie("refresh_token", "", -1, "/", "", false, true)
-	c.JSON(200, gin.H{"message": "successfully logged out"})
-}

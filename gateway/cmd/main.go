@@ -58,12 +58,11 @@ func main() {
 		authGroup.POST("/register", authHandler.Register)
 		authGroup.POST("/login", authHandler.Login)
 		authGroup.POST("/refresh", authHandler.RefreshToken)
-		authGroup.POST("/logout", authHandler.Logout)
 	}
 
 	eventGroup := router.Group("/events")
 	{
-		eventGroup.GET("/", eventHandler.GetEvents)
+		eventGroup.GET("/listevents", eventHandler.GetEvents)
 		eventGroup.GET("/:id", eventHandler.GetEvent)
 		eventGroup.POST("/", eventHandler.CreateEvent)
 		eventGroup.POST("/:id/join", eventHandler.JoinEvent)
