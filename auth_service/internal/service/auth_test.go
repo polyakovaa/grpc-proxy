@@ -100,7 +100,7 @@ func TestGenerateTokens_JWTClaims(t *testing.T) {
 
 }
 
-func TestValidateAccessToken_Success(t *testing.T) {
+func TestValidateAccessToken_Expired(t *testing.T) {
 	trepo := new(MockTokenRepo)
 	urepo := new(MockUserRepo)
 
@@ -115,13 +115,32 @@ func TestValidateAccessToken_Success(t *testing.T) {
 		"expires_at": time.Now().Add(-time.Hour).Unix(),
 	}
 	token := jwt.NewWithClaims(jwt.SigningMethodHS512, claims)
-	tokenStr, err := token.SignedString([]byte("secret"))
+	tokenStr, err := token.SignedString([]byte("secret123"))
 
 	assert.NoError(t, err)
 
 	u, exp, ok := svc.ValidateAccessToken(tokenStr)
 	assert.False(t, ok, "invalid")
 	assert.True(t, exp.Before(time.Now()), "expired")
+	assert.Nil(t, u, "invalid")
+
+}
+
+func TestValidateAccessToken_InvalidSign(t *testing.T) {
+	trepo := new(MockTokenRepo)
+	urepo := new(MockUserRepo)
+	svc := service.NewAuthService(urepo, trepo, "secret", time.Minute*15, time.Hour*24)
+	claims := jwt.MapClaims{
+		"user_id":    uuid.New().String(),
+		"token_id":   uuid.New().String(),
+		"expires_at": time.Now().Unix(),
+	}
+	token := jwt.NewWithClaims(jwt.SigningMethodHS512, claims)
+	tokenStr, _ := token.SignedString([]byte("wrong"))
+
+	u, exp, ok := svc.ValidateAccessToken(tokenStr)
+	assert.False(t, ok, "invalid")
+	assert.True(t, exp.IsZero())
 	assert.Nil(t, u, "invalid")
 
 }

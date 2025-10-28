@@ -1,0 +1,12 @@
+services:
+  auth_db_test:
+    image: postgres:16
+    environment:
+      POSTGRES_DB: test_db
+      POSTGRES_USER: test_user
+      POSTGRES_PASSWORD: test_password
+    ports:
+      - "5544:5432"
+    volumes:
+      - ./auth_service/internal/service/integration/init.sql:/docker-entrypoint-initdb.d/init.sql
+

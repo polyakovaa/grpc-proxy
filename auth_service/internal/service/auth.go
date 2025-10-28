@@ -107,7 +107,7 @@ func (s *AuthService) ValidateAccessToken(tokenStr string) (*model.User, time.Ti
 	})
 
 	if err != nil || !token.Valid {
-		log.Printf("Invaild access token: %v", err)
+		log.Printf("Invalid access token: %v", err)
 		return nil, time.Time{}, false
 	}
 
@@ -177,7 +177,7 @@ func (s *AuthService) RefreshToken(oldRefreshToken string) (*model.Token, error)
 	return s.GenerateTokens(storedToken.UserID)
 }
 
-func (s *AuthService) Authenticate(email, password string) (*model.User, error) {
+func (s *AuthService) Login(email, password string) (*model.User, error) {
 	user, err := s.userRepo.FindByEmail(email)
 	if err != nil {
 		return nil, errors.New("invalid email or password")

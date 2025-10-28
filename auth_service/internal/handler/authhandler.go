@@ -58,7 +58,7 @@ func (h *AuthHandler) ValidateToken(ctx context.Context, req *auth.ValidateToken
 }
 
 func (h *AuthHandler) Login(ctx context.Context, req *auth.LoginRequest) (*auth.AuthResponse, error) {
-	user, err := h.authService.Authenticate(req.Email, req.Password)
+	user, err := h.authService.Login(req.Email, req.Password)
 	if err != nil {
 		log.Printf("Failed login for %s: %v", req.Email, err)
 		return nil, err
